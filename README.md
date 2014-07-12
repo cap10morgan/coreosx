@@ -1,7 +1,7 @@
 coreosx
 =======
 
-# Installation
+## Installation
 
 CoreOS on OS X in three steps:
 
@@ -21,6 +21,23 @@ CoreOS on OS X in three steps:
 This script acts as both an installer and as Virtual machine manager. On first run, it installs and starts a CoreOS virtual machine. It forwards ports 4001 and 7001 from the host's localhost interface to the VM for etcd clients to connect to. It also (optionally) adds an entry to /etc/hosts called `localcoreos` for accessing exposed ports from Docker containers, for example.
 
 The virtual machine that Docker runs on is given the hostname `localcoreos`. For example, if you run `docker run -p 8000:8000 ...`, then that will be available at `localcoreos:8000` from OS X.
+
+## After Installation
+
+Instead of running `coreosx shell` all the time, it's much more convenient to
+add this to your shell's init file (~/.profile or similar):
+
+    eval `coreosx env`
+
+If you don't have them already, you'll probably want to install the docker client, etcdctl, and fleetctl
+on your OS X host. The simplest way to do that is to use [Homebrew](http://brew.sh):
+
+    brew install docker
+    brew install etcdctl
+    brew install fleetctl
+
+Once installed, they should Just Work as long as your CoreOS VM is running and you have eval'd `coreosx env`
+in your shell (or run `coreosx shell` first).
 
 ## Additional commands
 

@@ -9,7 +9,7 @@ CoreOS on OS X in three steps:
 
 2. Put the `coreosx` script somewhere on your path:
 
-        curl https://raw.githubusercontent.com/cap10morgan/coreosx/v1.0.0/coreosx > /usr/local/bin/coreosx
+        curl https://raw.githubusercontent.com/cap10morgan/coreosx/v1.0.1/coreosx > /usr/local/bin/coreosx
         chmod +x /usr/local/bin/coreosx
 
 3. Run:

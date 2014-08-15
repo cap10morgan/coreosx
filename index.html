@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>CoreOSX by cap10morgan</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>CoreOSX</h1>
+        <h2>Simple installation of a CoreOS dev environment on Mac OS X</h2>
+        <a href="https://github.com/cap10morgan/coreosx" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="coreosx" class="anchor" href="#coreosx"><span class="octicon octicon-link"></span></a>coreosx</h1>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>CoreOS on OS X in three steps:</p>
+
+<ol>
+<li><p>Install <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> and <a href="http://www.vagrantup.com/downloads.html">Vagrant</a>.</p></li>
+<li>
+<p>Put the <code>coreosx</code> script somewhere on your path:</p>
+
+<pre><code>curl https://raw.githubusercontent.com/cap10morgan/coreosx/v1.0.1/coreosx &gt; /usr/local/bin/coreosx
+chmod +x /usr/local/bin/coreosx
+</code></pre>
+</li>
+<li>
+<p>Run:</p>
+
+<pre><code>coreosx shell
+docker version (or etcdctl ls or fleetctl list-machines)
+</code></pre>
+</li>
+</ol><p>This script acts as both an installer and as Virtual machine manager. On first run, it installs and starts a CoreOS virtual machine. It forwards ports 4001 and 7001 from the host's localhost interface to the VM for etcd clients to connect to. It also (optionally) adds an entry to /etc/hosts called <code>localcoreos</code> for accessing exposed ports from Docker containers, for example.</p>
+
+<p>The virtual machine that Docker runs on is given the hostname <code>localcoreos</code>. For example, if you run <code>docker run -p 8000:8000 ...</code>, then that will be available at <code>localcoreos:8000</code> from OS X.</p>
+
+<h2>
+<a name="after-installation" class="anchor" href="#after-installation"><span class="octicon octicon-link"></span></a>After Installation</h2>
+
+<p>Instead of running <code>coreosx shell</code> all the time, it's much more convenient to
+add this to your shell's init file (~/.profile or similar):</p>
+
+<pre><code>eval `coreosx env`
+</code></pre>
+
+<p>If you don't have them already, you'll probably want to install the docker client, etcdctl, and fleetctl
+on your OS X host. The simplest way to do that is to use <a href="http://brew.sh">Homebrew</a>:</p>
+
+<pre><code>brew install docker
+brew install etcdctl
+brew install fleetctl
+</code></pre>
+
+<p>Once installed, they should Just Work as long as your CoreOS VM is running and you have eval'd <code>coreosx env</code>
+in your shell (or run <code>coreosx shell</code> first).</p>
+
+<h2>
+<a name="additional-commands" class="anchor" href="#additional-commands"><span class="octicon octicon-link"></span></a>Additional commands</h2>
+
+<p><code>coreosx</code> provide additional commands as shortcuts for controlling the Vagrant VM:</p>
+
+<h3>
+<a name="coreosx-start" class="anchor" href="#coreosx-start"><span class="octicon octicon-link"></span></a>coreosx start</h3>
+
+<p>Start the local Virtual Machine</p>
+
+<h3>
+<a name="coreosx-ssh" class="anchor" href="#coreosx-ssh"><span class="octicon octicon-link"></span></a>coreosx ssh</h3>
+
+<p>Open a console on the Vagrant virtual machine.</p>
+
+<h3>
+<a name="coreosx-destroy" class="anchor" href="#coreosx-destroy"><span class="octicon octicon-link"></span></a>coreosx destroy</h3>
+
+<p>Destroy the local Virtual Machine</p>
+
+<h3>
+<a name="coreosx-halt" class="anchor" href="#coreosx-halt"><span class="octicon octicon-link"></span></a>coreosx halt</h3>
+
+<p>Stop the Vagrant VM. You'll probably want to do this after you've finished working with CoreOS to save RAM.</p>
+
+<h3>
+<a name="coreosx-shell" class="anchor" href="#coreosx-shell"><span class="octicon octicon-link"></span></a>coreosx shell</h3>
+
+<p>Start the virtual machine and open a shell with DOCKER_HOST environment variable configured.</p>
+
+<h2>
+<a name="override-defaults" class="anchor" href="#override-defaults"><span class="octicon octicon-link"></span></a>Override defaults</h2>
+
+<p>The coreosx script has several options that can be overridden by adding a
+new file <code>$HOME/.coreosx/defaults</code>. When coreosx starts the VM, it will
+source this file.</p>
+
+<p>When modifying the defaults for coreosx, currently, it is best to destroy
+any already-created VM and configure a new one with the changes.</p>
+
+<p>An example <code>defaults</code> file follows:</p>
+
+<div class="highlight highlight-bash"><pre><span class="c"># $HOME/.coreosx/defaults</span>
+<span class="nv">COREOS_IP</span><span class="o">=</span>192.168.228.10
+</pre></div>
+
+<h3>
+<a name="coreos_ip" class="anchor" href="#coreos_ip"><span class="octicon octicon-link"></span></a>COREOS_IP</h3>
+
+<p>The IP that the docker host will be mapped to on your machine.</p>
+
+<p>Default: <code>172.16.23.75</code></p>
+
+<h3>
+<a name="coreos_domain" class="anchor" href="#coreos_domain"><span class="octicon octicon-link"></span></a>COREOS_DOMAIN</h3>
+
+<p>The domain name added to <code>/etc/hosts</code>, pointing at the <code>COREOS_IP</code>.</p>
+
+<p>Default: <code>localcoreos</code></p>
+
+<h3>
+<a name="docker_port" class="anchor" href="#docker_port"><span class="octicon octicon-link"></span></a>DOCKER_PORT</h3>
+
+<p>The port that docker will be listening on.</p>
+
+<p>Default: <code>2375</code></p>
+
+<h3>
+<a name="coreos_channel" class="anchor" href="#coreos_channel"><span class="octicon octicon-link"></span></a>COREOS_CHANNEL</h3>
+
+<p>The initial version of CoreOS will be installed from this release and updates will come from it afterwards.</p>
+
+<p>Default: <code>alpha</code></p>
+
+<h3>
+<a name="vagrant_box_url" class="anchor" href="#vagrant_box_url"><span class="octicon octicon-link"></span></a>VAGRANT_BOX_URL</h3>
+
+<p>The URL used to download the vagrant box.</p>
+
+<p>Default: <code>http://${COREOS_CHANNEL}.release.core-os.net/amd64-usr/current/coreos_production_vagrant.json</code></p>
+
+<h2>
+<a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
+
+<ul>
+<li>
+<a href="https://github.com/cap10morgan">Wes Morgan</a> - CoreOSX author</li>
+<li>
+<a href="https://github.com/noplay/">Julien Duponchelle</a> – Original author of docker-osx, which this is adapted from</li>
+<li>
+<a href="https://github.com/bfirsh">Ben Firshman</a> – Faster and simpler installation of docker-osx with Vagrant image and pre-built binary</li>
+</ul><h2>
+<a name="licence" class="anchor" href="#licence"><span class="octicon octicon-link"></span></a>Licence</h2>
+
+<p>Copyright 2014 Wes Morgan</p>
+
+<p>Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+
+<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/cap10morgan/coreosx/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/cap10morgan/coreosx/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/cap10morgan/coreosx"></a> is maintained by <a href="https://github.com/cap10morgan">cap10morgan</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
